@@ -1,0 +1,11 @@
+canvas {
+    background: -webkit-radial-gradient(#303030, black);
+    background: -o-radial-gradient(#303030, black);
+    background: -moz-radial-gradient(#303030, black);
+    background: radial-gradient(#303030, black);
+    position: absolute;
+    border: 0 solid #000000;
+    overflow: hidden;
+    left: 0;
+    top: 0;
+}
