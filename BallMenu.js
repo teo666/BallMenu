@@ -68,6 +68,12 @@ BallMenu.prototype.center = function(){
     //this.positions.current.y = move.y;
 };
 
+BallMenu.prototype.loadForAnimation = function () {
+    this.balls.forEach(function (item) {
+        jsAnimator.add(item,{removeOnStop : false});
+    })
+};
+
 BallMenu.prototype.loadConf = function (config) {
     let self = this;
     try{
@@ -76,7 +82,7 @@ BallMenu.prototype.loadConf = function (config) {
             if(!item.hasOwnProperty("srcImg") || ! item.hasOwnProperty("dstUrl")){
                 console.warn("Element at position " + i + " in bad formatted");
             }else {
-                self.balls.push(new Ball(item.srcImg,item.dstUrl),{removeOnStop: false});
+                self.balls.push(new Ball(item.srcImg,item.dstUrl,{keepOnEnd: true,keepDraw: true}));
             }
         })
     }catch(e){
@@ -169,11 +175,15 @@ BallMenu.prototype.findLevel = function(n){
 
 BallMenu.prototype.loadBall = function(){
     let a = [];
-    let self = this;
-    this.balls.forEach(function (item,i) {
-        a.push(self.balls[i].loadImage());
+    this.balls.forEach(function (item) {
+        a.push(item.loadImage());
     });
     return Promise.all(a);
+};
+
+BallMenu.prototype.getBall = function (n) {
+    if(n < 0 || n > this.balls.length) return false;
+    return this.balls[n];
 };
 
 BallMenu.prototype.drawBalls = function () {
@@ -193,8 +203,30 @@ BallMenu.prototype.setMouseMoveHandler = function(){
                 return false;
             }
         });
+        let old_sel = self.getSelected();
+        self.selected = sel;
+        self.setSelected();
+        let sele = self.getSelected();
+        if(sele) sele.setDrawable();
+        if(old_sel) old_sel.setDrawable();
         //console.log(e.clientX - self.positions.x, e.clientY - self.positions.y);
+        //console.log(self.selected);
+        if(old_sel || sele){
+            jsAnimator.animationStart();
+        }
+    });
+};
+
+BallMenu.prototype.setSelected = function () {
+    let self = this;
+    this.balls.forEach(function (item,i) {
+        item.setSelected(self.selected === i);
     })
+};
+
+BallMenu.prototype.getSelected = function () {
+    if(this.selected < 0) return false;
+    return this.getBall(this.selected);
 };
 
 BallMenu.prototype.clearAll = function(){
@@ -233,5 +265,7 @@ BallMenu.prototype.setMouseWheelHanler = function(){
             self.radius *= 1/factor;
         }
         self.setRadius(self.radius);
+        self.clearAll();
+        self.drawBalls();
     })
 };

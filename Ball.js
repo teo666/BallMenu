@@ -1,4 +1,4 @@
-function Ball (srcI, dstU) {
+function Ball (srcI, dstU, prop) {
     this.src = srcI;
     this.dst = dstU;
     this.img = new Image();
@@ -9,28 +9,39 @@ function Ball (srcI, dstU) {
     this.offset = 0.85;
     this.min = 0;
     this.offIncrement = 0.02;
-    this.off = null;
+    this.offset  = 0;
     this.context = null;
     this.radius = 0;
     this.padding = 0;
-
+    this.selected = false;
+    this.prop = prop;
 }
 Ball.prototype.fn_draw = function () {
-    let r = this.radius * (1 - this.padding);
+    let r = this.radius * (1 - this.padding + this.offset);
     if(this.isLoaded()){
         this.context.save();
         this.context.translate(this.position.x*this.radius*2,this.position.y*this.radius*2);
-        this.context.drawImage(this.img, -r,-r,2*r,2*r);
+        this.context.drawImage(this.img, -r ,-r,2*r,2*r);
         this.context.restore();
     }
 };
 
-Ball.prototype.fn_stop = function () {
+Ball.prototype.setSelected = function (b) {
+    this.selected = b;
+};
 
+Ball.prototype.fn_stop = function () {
+    return (this.offset <= 0 || this.offset >= this.padding)
 };
 
 Ball.prototype.fn_update = function () {
-
+    if(this.selected){
+        this.offset += 0.03;
+        this.offset = Math.min(this.padding, this.offset);
+    } else {
+        this.offset -= 0.03;
+        this.offset = Math.max(0,this.offset);
+    }
 };
 
 Ball.prototype.setRadius = function (n) {
@@ -90,5 +101,9 @@ Ball.prototype.hitTest = function(e){
 
     //console.log(this.position, e);
     return (Math.pow(e.x-x,2) + Math.pow(e.y-y,2) < Math.pow(this.radius * (1 - this.padding),2));
+};
+
+Ball.prototype.setDrawable = function(){
+    this.prop.state = _state.DRAWABLE;
 };
 

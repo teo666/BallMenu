@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Ball Menu</title>
     <link rel="stylesheet" type="text/css" href="BallMenu.css">
-    <script type="text/javascript" src="./lib/jsAnimator/jsAnimator.js"></script>
+    <script type="text/javascript" src="./lib/jsanimator/jsAnimator.js"></script>
     <script type="text/javascript" src="./conf.js"></script>
     <script type="text/javascript" src="./Ball.js"></script>
     <script type="text/javascript" src="./BallMenu.js"></script>
@@ -22,11 +22,15 @@
         menu.center();
         menu.drawOrigin();
         menu.loadConf(conf);
+        menu.loadForAnimation();
+        menu.setRadius(75);
+        menu.setPadding(0.15);
+        menu.dispose();
+        menu.setContext();
+        jsAnimator.setGlobalOnFrameRenderStart(function () {
+            menu.clearAll();
+        });
         menu.loadBall().then(function () {
-            menu.setRadius(75);
-            menu.setPadding(0.15);
-            menu.dispose();
-            menu.setContext();
             menu.drawBalls();
         });
     }
