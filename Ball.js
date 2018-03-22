@@ -12,6 +12,7 @@ function Ball (srcI, dstU, prop) {
     this.offset  = 0;
     this.context = null;
     this.radius = 0;
+    this.real_radius = 0;
     this.padding = 0;
     this.selected = false;
     this.prop = prop;
@@ -31,8 +32,8 @@ Ball.prototype.setSelected = function (b) {
 };
 
 Ball.prototype.fn_stop = function () {
-    return (this.offset <= 0 || this.offset >= this.padding)
-};
+    return (this.offset <= 0 || this.offset >= this.padding) /*&& (this.real_radius <= 0 || this.real_radius >= this.radius)
+*/};
 
 Ball.prototype.fn_update = function () {
     if(this.selected){
@@ -41,11 +42,22 @@ Ball.prototype.fn_update = function () {
     } else {
         this.offset -= 0.03;
         this.offset = Math.max(0,this.offset);
-    }
+    }/*
+    if(this.real_radius < this.radius){
+        this.real_radius += 5;
+        this.real_radius = Math.min(this.radius, this.real_radius);
+    } else {
+        this.real_radius -= 5;
+        this.real_radius = Math.max(0,this.real_radius);
+    }*/
 };
 
 Ball.prototype.setRadius = function (n) {
     this.radius = n;
+};
+
+Ball.prototype.setRealRadius = function (n) {
+    this.real_radius = n;
 };
 
 Ball.prototype.setPadding = function (n) {

@@ -10,6 +10,7 @@ function BallMenu(){
     this.radius = 75;
     this.sqrt3d2 = 0.86602540378;
     this.selected = -1;
+    this.bound = {x:0,y:0,width:0,height:0};
 }
 
 BallMenu.prototype.setRadius = function (n) {
@@ -19,6 +20,13 @@ BallMenu.prototype.setRadius = function (n) {
         item.setRadius(n);
     });
     return true;
+};
+
+BallMenu.prototype.setRealRadius = function (n) {
+    if(n < 0 ) return false;
+    this.balls.forEach(function (item,i) {
+        item.setRealRadius(n);
+    });
 };
 
 BallMenu.prototype.setPadding = function (n) {
@@ -207,11 +215,11 @@ BallMenu.prototype.setMouseMoveHandler = function(){
         self.selected = sel;
         self.setSelected();
         let sele = self.getSelected();
-        if(sele) sele.setDrawable();
-        if(old_sel) old_sel.setDrawable();
         //console.log(e.clientX - self.positions.x, e.clientY - self.positions.y);
         //console.log(self.selected);
-        if(old_sel || sele){
+        if((old_sel || sele) && (old_sel !== sele)){
+            if(sele) sele.setDrawable();
+            if(old_sel) old_sel.setDrawable();
             jsAnimator.animationStart();
         }
     });
@@ -235,19 +243,30 @@ BallMenu.prototype.clearAll = function(){
     ctx.clearRect(-l,-l,2*l,2*l)
 
     /*cancellazione esatta*/
-    //let l = ballset.getBound();
-    //ctx.clearRect(l.x*ballset.radius-1,l.y*ballset.radius-1,l.width*ballset.radius+2,l.height*ballset.radius+2)
+    //let l = this.getBound();
+    //this.context.clearRect(l.x*this.radius-2,l.y*this.radius-2,l.width*this.radius+4,l.height*this.radius+4);
 
     /*cancellazione approssimata*/
     let l = (this.findLevel(this.balls.length)+1.5)*(2*this.radius);
-    this.context.clearRect(-l,-l,2*l,2*l)
+    this.context.clearRect(-1000,-1000,2*1000,2*1000);
 
-    /*ctx.beginPath();
-    ctx.lineWidth="1";
-    ctx.strokeStyle="red";
-    ctx.rect(-l,-l,2*l,2*l)
-    ctx.stroke();*/
+    this.context.beginPath();
+    this.context.lineWidth="1";
+    this.context.strokeStyle="red";
+    this.context.rect(-l,-l,2*l,2*l);
+    this.context.stroke();
 
+};
+
+BallMenu.prototype.getBound = function(){
+    return this.bound;
+};
+
+BallMenu.prototype.setBound = function(){
+    this.bound.y = -(this.findLevel(this.balls.length)*2 +1);
+    this.bound.x = -(this.findLevel(this.balls.length)*2*0.86602540378 + 1);
+    this.bound.width = -2*this.bound.x;
+    this.bound.height = -2*this.bound.y
 };
 
 BallMenu.prototype.setMouseWheelHanler = function(){
@@ -255,9 +274,9 @@ BallMenu.prototype.setMouseWheelHanler = function(){
     this.canvas.addEventListener('wheel', function(e){
         e.preventDefault();
         console.log(e.deltaY);
-        let factor = 1.01;
+        let factor = 1.03;
         if(e.ctrlKey){
-            factor *= 1.03;
+            factor *= 1.08;
         }
         if(e.deltaY <= 0){
             self.radius *= factor;
@@ -265,7 +284,15 @@ BallMenu.prototype.setMouseWheelHanler = function(){
             self.radius *= 1/factor;
         }
         self.setRadius(self.radius);
+        //self.setAllDrawable();
         self.clearAll();
         self.drawBalls();
+        //jsAnimator.animationStart();
+    })
+};
+
+BallMenu.prototype.setAllDrawable = function () {
+    this.balls.forEach(function (item,i) {
+        item.setDrawable();
     })
 };
