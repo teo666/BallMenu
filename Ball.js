@@ -16,12 +16,15 @@ function Ball (srcI, dstU, prop) {
     this.padding = 0;
     this.selected = false;
     this.prop = prop;
+    this.zoom_direction = 0;
 }
 Ball.prototype.fn_draw = function () {
-    let r = this.radius * (1 - this.padding + this.offset);
+    let r = this.real_radius * (1.0 - this.padding + this.offset);
+    //console.log("--" +r, this.real_radius, this.radius);
+
     if(this.isLoaded()){
         this.context.save();
-        this.context.translate(this.position.x*this.radius*2,this.position.y*this.radius*2);
+        this.context.translate(this.position.x*this.real_radius*2,this.position.y*this.real_radius*2);
         this.context.drawImage(this.img, -r ,-r,2*r,2*r);
         this.context.restore();
     }
@@ -32,28 +35,43 @@ Ball.prototype.setSelected = function (b) {
 };
 
 Ball.prototype.fn_stop = function () {
-    return (this.offset <= 0 || this.offset >= this.padding) /*&& (this.real_radius <= 0 || this.real_radius >= this.radius)
-*/};
+    //console.log(this.real_radius, this.radius);
+    return (this.offset <= 0 || this.offset >= this.padding) &&(this.real_radius <= 0 || this.real_radius === this.radius)
+};
 
 Ball.prototype.fn_update = function () {
     if(this.selected){
-        this.offset += 0.03;
+        this.offset += 0.02;
         this.offset = Math.min(this.padding, this.offset);
     } else {
-        this.offset -= 0.03;
+        this.offset -= 0.02;
         this.offset = Math.max(0,this.offset);
-    }/*
-    if(this.real_radius < this.radius){
-        this.real_radius += 5;
+    }
+
+    let diff = Math.abs(this.radius - this.real_radius);
+    let inc = diff / 5;
+    if(Math.abs(this.real_radius - this.radius) < 0.01 ){
+        this.real_radius = this.radius;
+        return;
+    }
+    if(this.real_radius <= this.radius){
+        this.real_radius += inc;
+
         this.real_radius = Math.min(this.radius, this.real_radius);
     } else {
-        this.real_radius -= 5;
-        this.real_radius = Math.max(0,this.real_radius);
-    }*/
+        this.real_radius -= inc;
+
+        this.real_radius = Math.max(this.radius,this.real_radius);
+    }
+    //console.log(this.real_radius)
 };
 
 Ball.prototype.setRadius = function (n) {
     this.radius = n;
+};
+
+Ball.prototype.setZoomDirection = function (d) {
+    this.zoom_direction = d;
 };
 
 Ball.prototype.setRealRadius = function (n) {

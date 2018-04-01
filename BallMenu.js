@@ -11,15 +11,42 @@ function BallMenu(){
     this.sqrt3d2 = 0.86602540378;
     this.selected = -1;
     this.bound = {x:0,y:0,width:0,height:0};
+    this.minRadius = null;
+    this.minRadius = null;
 }
+
+BallMenu.prototype.setMaxRadius = function (n) {
+    this.maxRadius = n;
+};
+
+BallMenu.prototype.setMinRadius = function (n) {
+    this.minRadius = n;
+};
 
 BallMenu.prototype.setRadius = function (n) {
     if(n < 0 ) return false;
+    if(this.minRadius == null){
+        this.setMinRadius(n);
+    } else if(n < this.minRadius){
+        n = this.minRadius;
+    }
+
+    if(this.maxRadius == null){
+        this.setMaxRadius(n);
+    } else if(n > this.maxRadius){
+        n = this.maxRadius;
+    }
     this.radius = n;
     this.balls.forEach(function (item,i) {
         item.setRadius(n);
     });
     return true;
+};
+
+BallMenu.prototype.setZoomDirection = function (d) {
+    this.balls.forEach(function (item,i) {
+        item.setZoomDirection(d);
+    });
 };
 
 BallMenu.prototype.setRealRadius = function (n) {
@@ -250,11 +277,11 @@ BallMenu.prototype.clearAll = function(){
     let l = (this.findLevel(this.balls.length)+1.5)*(2*this.radius);
     this.context.clearRect(-1000,-1000,2*1000,2*1000);
 
-    this.context.beginPath();
+    /*this.context.beginPath();
     this.context.lineWidth="1";
     this.context.strokeStyle="red";
     this.context.rect(-l,-l,2*l,2*l);
-    this.context.stroke();
+    this.context.stroke();*/
 
 };
 
@@ -273,21 +300,23 @@ BallMenu.prototype.setMouseWheelHanler = function(){
     let self = this;
     this.canvas.addEventListener('wheel', function(e){
         e.preventDefault();
-        console.log(e.deltaY);
-        let factor = 1.03;
+        //console.log(e.deltaY);
+        let factor = 1.05;
         if(e.ctrlKey){
             factor *= 1.08;
         }
-        if(e.deltaY <= 0){
+        if(e.deltaY < 0){
             self.radius *= factor;
+            self.setZoomDirection(1);
         } else {
-            self.radius *= 1/factor;
+            self.radius /= factor;
+            self.setZoomDirection(-1);
         }
         self.setRadius(self.radius);
-        //self.setAllDrawable();
-        self.clearAll();
-        self.drawBalls();
-        //jsAnimator.animationStart();
+        self.setAllDrawable();
+        //self.clearAll();
+        //self.drawBalls();
+        jsAnimator.animationStart();
     })
 };
 
