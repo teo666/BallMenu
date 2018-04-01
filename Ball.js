@@ -42,7 +42,9 @@ Ball.prototype.passCoordinates = function (n) {
 
 Ball.prototype.fn_stop = function () {
     //console.log(this.real_radius, this.radius);
-    return (this.offset <= 0 || this.offset >= this.padding) &&(this.real_radius <= 0 || this.real_radius === this.radius)
+    return (this.offset <= 0 || this.offset >= this.padding) &&
+        (this.real_radius <= 0 || this.real_radius === this.radius) &&
+        this.parent_pos.stop;
 };
 
 Ball.prototype.fn_update = function () {
