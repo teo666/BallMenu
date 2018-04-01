@@ -3,9 +3,26 @@ function BallMenu(){
     this.canvas = null;
     this.context = null;
     this.positions = {
-        x:0,
-        y:0,
-        current : {x:0,y:0}
+        center:{ //coordinate del centro del canvas
+            x: 0,
+            y: 0
+        },
+        /*drag : { //spostamenti relativi del drag and drop
+            dx : 0,
+            dy : 0
+        },*/
+        to_reach : { //coordinate da raggiungere nel drag and drop
+            x: 0,
+            y: 0
+        },
+        accumulated :{ //posizione accumulata delle palle
+            x: 0,
+            y:0
+        },
+        handle :{ //coordinate del punto di drag
+            x: 0,
+            y: 0
+        }
     };
     this.radius = 75;
     this.sqrt3d2 = 0.86602540378;
@@ -13,6 +30,7 @@ function BallMenu(){
     this.bound = {x:0,y:0,width:0,height:0};
     this.minRadius = null;
     this.minRadius = null;
+    this.dragging = false;
 }
 
 BallMenu.prototype.setMaxRadius = function (n) {
@@ -96,11 +114,9 @@ BallMenu.prototype.drawOrigin = function(){
 };
 
 BallMenu.prototype.center = function(){
-    this.positions.x = this.canvas.width/2;
-    this.positions.y = this.canvas.height/2;
-    this.context.translate(this.positions.x, this.positions.y)
-    //this.positions.current.x = move.x;
-    //this.positions.current.y = move.y;
+    this.positions.center.x = this.canvas.width/2;
+    this.positions.center.y = this.canvas.height/2;
+    this.context.translate(this.positions.center.x, this.positions.center.y)
 };
 
 BallMenu.prototype.loadForAnimation = function () {
@@ -117,7 +133,7 @@ BallMenu.prototype.loadConf = function (config) {
             if(!item.hasOwnProperty("srcImg") || ! item.hasOwnProperty("dstUrl")){
                 console.warn("Element at position " + i + " in bad formatted");
             }else {
-                self.balls.push(new Ball(item.srcImg,item.dstUrl,{keepOnEnd: true,keepDraw: true}));
+                self.balls.push(new Ball(item.srcImg,item.dstUrl,self.positions,{keepOnEnd: true,keepDraw: true}));
             }
         })
     }catch(e){
@@ -227,31 +243,6 @@ BallMenu.prototype.drawBalls = function () {
     })
 };
 
-BallMenu.prototype.setMouseMoveHandler = function(){
-    self = this;
-    let sel = -1;
-    this.canvas.addEventListener('mousemove',function(e){
-        sel = -1;
-        self.balls.forEach(function (item,i) {
-            if(item.hitTest({x: e.clientX - self.positions.x,y: e.clientY - self.positions.y})){
-                sel = i;
-                return false;
-            }
-        });
-        let old_sel = self.getSelected();
-        self.selected = sel;
-        self.setSelected();
-        let sele = self.getSelected();
-        //console.log(e.clientX - self.positions.x, e.clientY - self.positions.y);
-        //console.log(self.selected);
-        if((old_sel || sele) && (old_sel !== sele)){
-            if(sele) sele.setDrawable();
-            if(old_sel) old_sel.setDrawable();
-            jsAnimator.animationStart();
-        }
-    });
-};
-
 BallMenu.prototype.setSelected = function () {
     let self = this;
     this.balls.forEach(function (item,i) {
@@ -317,6 +308,81 @@ BallMenu.prototype.setMouseWheelHanler = function(){
         //self.clearAll();
         //self.drawBalls();
         jsAnimator.animationStart();
+    })
+};
+
+BallMenu.prototype.setMouseDownHanler = function () {
+    let self = this;
+    this.canvas.addEventListener('mousedown',function(e){
+        console.log(e.clientX - self.positions.center.x, e.clientY - self.positions.center.y);
+        self.positions.handle.x = e.clientX;
+        self.positions.handle.y = e.clientY;
+
+
+        /*let offset = self.getBoundingClientRect();
+        self.positions.handle.x = e.clientX-offset.left;
+        self.positions.handle.y = e.clientY-offset.top;
+        self.positions.drag = true;*/
+        self.dragging = true;
+        //console.log(move.drag)
+    })
+};
+
+BallMenu.prototype.setMouseUpHandler = function(){
+    let self = this;
+    this.canvas.addEventListener('mouseup',function(e){
+        /*if(!self.dragging && self.selected > -1){
+            //document.location.href = ballset.getBalls()[ballset.selected].getDstUrl()
+            window.open(self.balls[self.selected].getDstUrl(),'_blank');
+            window.focus();
+        }*/
+        self.dragging = false;
+        //console.log(move.drag)
+    })
+};
+
+BallMenu.prototype.setMouseMoveHandler = function(){
+    self = this;
+    let sel = -1;
+    this.canvas.addEventListener('mousemove',function(e){
+        sel = -1;
+        if(self.dragging){
+            self.positions.to_reach.x += (e.clientX - self.positions.handle.x);
+            self.positions.to_reach.y += (e.clientY - self.positions.handle.y);
+            //self.setAllDrawable();
+            jsAnimator.animationStart();
+            self.positions.handle.x = e.clientX;
+            self.positions.handle.y = e.clientY;
+            //console.log(self.positions.to_reach);
+        }
+        self.balls.forEach(function (item,i) {
+            if(item.hitTest({x: e.clientX - self.positions.center.x,y: e.clientY - self.positions.center.y})){
+                sel = i;
+                return false;
+            }
+        });
+        let old_sel = self.getSelected();
+        self.selected = sel;
+        self.setSelected();
+        let sele = self.getSelected();
+        //console.log(e.clientX - self.positions.x, e.clientY - self.positions.y);
+        //console.log(self.selected);
+        if((old_sel || sele) && (old_sel !== sele)){
+            if(sele) sele.setDrawable();
+            if(old_sel) old_sel.setDrawable();
+            jsAnimator.animationStart();
+        }
+    });
+};
+
+BallMenu.prototype.incrementAccumulator = function () {
+
+};
+
+BallMenu.prototype.passCoordinates = function () {
+    let self = this;
+    this.balls.forEach(function (item,i) {
+        item.passCoordinates(self.positions);
     })
 };
 

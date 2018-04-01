@@ -19,6 +19,8 @@
         menu.init("ballCanvas");
         menu.setMouseMoveHandler();
         menu.setMouseWheelHanler();
+        menu.setMouseDownHanler();
+        menu.setMouseUpHandler();
         menu.center();
         menu.drawOrigin();
         menu.loadConf(conf);
@@ -33,6 +35,7 @@
         menu.setContext();
         jsAnimator.setGlobalOnFrameRenderStart(function () {
             menu.clearAll();
+            menu.incrementAccumulator();
         });
         menu.loadBall().then(function () {
             menu.drawBalls();

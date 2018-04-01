@@ -1,4 +1,4 @@
-function Ball (srcI, dstU, prop) {
+function Ball (srcI, dstU, positions,prop) {
     this.src = srcI;
     this.dst = dstU;
     this.img = new Image();
@@ -17,6 +17,7 @@ function Ball (srcI, dstU, prop) {
     this.selected = false;
     this.prop = prop;
     this.zoom_direction = 0;
+    this.parent_pos = positions;
 }
 Ball.prototype.fn_draw = function () {
     let r = this.real_radius * (1.0 - this.padding + this.offset);
@@ -24,7 +25,8 @@ Ball.prototype.fn_draw = function () {
 
     if(this.isLoaded()){
         this.context.save();
-        this.context.translate(this.position.x*this.real_radius*2,this.position.y*this.real_radius*2);
+        this.context.translate(this.position.x*this.real_radius*2+this.parent_pos.accumulated.x,
+            this.position.y*this.real_radius*2+this.parent_pos.accumulated.y);
         this.context.drawImage(this.img, -r ,-r,2*r,2*r);
         this.context.restore();
     }
@@ -32,6 +34,10 @@ Ball.prototype.fn_draw = function () {
 
 Ball.prototype.setSelected = function (b) {
     this.selected = b;
+};
+
+Ball.prototype.passCoordinates = function (n) {
+    this.menuPositions = n;
 };
 
 Ball.prototype.fn_stop = function () {
