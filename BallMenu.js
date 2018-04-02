@@ -50,8 +50,8 @@ BallMenu.prototype.setCanvasSize = function () {
 BallMenu.prototype.setRadius = function (n) {
     if(n < 0 ) return false;
     //limita la dimensione del raggio
-    if(self.radius >= self.maxRadius || self.radius <= self.minRadius){
-        self.radius = Math.min(Math.max(self.minRadius,self.radius),self.maxRadius);
+    if(n >= self.maxRadius || n <= self.minRadius){
+        n = Math.min(Math.max(self.minRadius,n),self.maxRadius);
     }
     this.radius = n;
     this.balls.forEach(function (item) {
@@ -271,12 +271,14 @@ BallMenu.prototype.setMouseWheelHandler = function(){
         } else {
             self.radius /= factor;
         }
+        self.setRadius(self.radius);
+
+
         //se il raggio ha già le dimensioni limite non faccio nulla
         if(self.radius >= self.maxRadius || self.radius <= self.minRadius){
             return;
         }
 
-        self.setRadius(self.radius);
 
         let x = e.clientX - self.positions.center.x - self.positions.to_reach.x;
         let y = e.clientY - self.positions.center.y - self.positions.to_reach.y;
