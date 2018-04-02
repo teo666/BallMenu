@@ -11,7 +11,7 @@
 </head>
 <body onload="init()">
 
-<canvas id="ballCanvas" width="1000" height="800"></canvas>
+<canvas id="ballCanvas" width="5000" height="5000"></canvas>
 <script>
     let menu = null;
     function init() {
@@ -28,7 +28,7 @@
         menu.setRadius(75);
         menu.setMaxRadius(500);
         menu.setMinRadius(10);
-        menu.setRealRadius(75);
+        menu.setRealRadius(500);
         menu.setPadding(0.15);
         menu.dispose();
         menu.setContext();
@@ -41,6 +41,7 @@
         });
         menu.loadBall().then(function () {
             menu.drawBalls();
+            jsAnimator.animationStart();
         });
     }
 </script>
