@@ -22,13 +22,12 @@
         menu.setMouseDownHandler();
         menu.setMouseUpHandler();
         menu.center();
-        menu.drawOrigin();
+        //menu.drawOrigin();
         menu.loadConf(conf);
         menu.loadForAnimation();
         menu.setRadius(75);
         menu.setMaxRadius(500);
         menu.setMinRadius(10);
-        menu.setBound();
         menu.setRealRadius(75);
         menu.setPadding(0.15);
         menu.dispose();
@@ -38,7 +37,6 @@
             menu.incrementAccumulator();
         });
         jsAnimator.setGlobalOnFrameRenderEnd(function () {
-            //menu.drawOrigin();
 
         });
         menu.loadBall().then(function () {

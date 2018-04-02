@@ -7,7 +7,6 @@ function Ball (srcI, dstU, positions,prop) {
     this.position = {x: 0, y: 0};
     this.offset = 0.85;
     this.min = 0;
-    this.offIncrement = 0.02;
     this.offset  = 0;
     this.context = null;
     this.radius = 0;
@@ -20,24 +19,21 @@ function Ball (srcI, dstU, positions,prop) {
 Ball.prototype.fn_draw = function () {
     let min;
     let cToS = {
-        x: this.position.x*2*this.radius + this.parent_pos.accumulated.x + this.parent_pos.center.x,
-        y: this.position.y*2*this.radius + this.parent_pos.accumulated.y + this.parent_pos.center.y
+        x: this.position.x*2*this.real_radius + this.parent_pos.accumulated.x + this.parent_pos.center.x,
+        y: this.position.y*2*this.real_radius + this.parent_pos.accumulated.y + this.parent_pos.center.y
     };
     //console.log(cToS)
-    if(cToS.x < this.radius || cToS.x > this.parent_pos.canvas_size.w - this.radius ||
-        cToS.y < this.radius || cToS.y > this.parent_pos.canvas_size.h - this.radius){
+    if(cToS.x < this.real_radius || cToS.x > this.parent_pos.canvas_size.w - this.real_radius ||
+        cToS.y < this.real_radius || cToS.y > this.parent_pos.canvas_size.h - this.real_radius){
         min = Math.min(cToS.x ,this.parent_pos.canvas_size.w - cToS.x, cToS.y,
-            this.parent_pos.canvas_size.h - cToS.y) - this.radius;
+            this.parent_pos.canvas_size.h - cToS.y) - this.real_radius;
         min = Math.abs(min);
 
     } else {
         min = 0;
     }
-    /*if(this.position.x == 0 && this.position.y == 0){
-        console.log(min);
-    }*/
+
     let r = Math.max(0, this.real_radius * (1.0 - this.padding + this.offset) - min);
-    //console.log("--" +r, this.real_radius, this.radius);
 
     if(this.isLoaded()){
         this.context.save();
@@ -90,10 +86,6 @@ Ball.prototype.setRadius = function (n) {
     this.radius = n;
 };
 
-Ball.prototype.setZoomDirection = function (d) {
-    this.zoom_direction = d;
-};
-
 Ball.prototype.setRealRadius = function (n) {
     this.real_radius = n;
 };
@@ -112,10 +104,6 @@ Ball.prototype.getSrcImg = function(){
 
 Ball.prototype.getDstUrl = function(){
     return this.dst;
-};
-
-Ball.prototype.getPosition = function(){
-    return this.position;
 };
 
 Ball.prototype.setPosition = function(p){

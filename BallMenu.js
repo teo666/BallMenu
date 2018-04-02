@@ -28,7 +28,6 @@ function BallMenu(){
     this.radius = 75;
     this.sqrt3d2 = 0.86602540378;
     this.selected = -1;
-    this.bound = {x:0,y:0,width:0,height:0};
     this.minRadius = null;
     this.minRadius = null;
     this.dragging = false;
@@ -50,40 +49,27 @@ BallMenu.prototype.setCanvasSize = function () {
 
 BallMenu.prototype.setRadius = function (n) {
     if(n < 0 ) return false;
-    if(this.minRadius == null){
-        //this.setMinRadius(n);
-    } else if(n < this.minRadius){
-        n = this.minRadius;
-    }
-
-    if(this.maxRadius == null){
-        //this.setMaxRadius(n);
-    } else if(n > this.maxRadius){
-        n = this.maxRadius;
+    //limita la dimensione del raggio
+    if(self.radius >= self.maxRadius || self.radius <= self.minRadius){
+        self.radius = Math.min(Math.max(self.minRadius,self.radius),self.maxRadius);
     }
     this.radius = n;
-    this.balls.forEach(function (item,i) {
+    this.balls.forEach(function (item) {
         item.setRadius(n);
     });
     return true;
 };
 
-BallMenu.prototype.setZoomDirection = function (d) {
-    this.balls.forEach(function (item,i) {
-        item.setZoomDirection(d);
-    });
-};
-
 BallMenu.prototype.setRealRadius = function (n) {
     if(n < 0 ) return false;
-    this.balls.forEach(function (item,i) {
+    this.balls.forEach(function (item) {
         item.setRealRadius(n);
     });
 };
 
 BallMenu.prototype.setPadding = function (n) {
     if(n > 1 || n < 0 ) return false;
-    this.balls.forEach(function (item,i) {
+    this.balls.forEach(function (item) {
         item.setPadding(n);
     });
     return true;
@@ -106,7 +92,8 @@ BallMenu.prototype.init = function () {
     window.onresize = function () {
         self.resize();
         self.center();
-        self.drawOrigin();
+        //self.drawOrigin();
+        self.drawBalls();
     };
 };
 
@@ -149,9 +136,9 @@ BallMenu.prototype.loadConf = function (config) {
     }
 };
 
-BallMenu.prototype.setContext = function (context) {
+BallMenu.prototype.setContext = function () {
     let self = this;
-    this.balls.forEach(function (item,i) {
+    this.balls.forEach(function (item) {
         item.setContext(self.context);
     })
 };
@@ -246,7 +233,7 @@ BallMenu.prototype.getBall = function (n) {
 };
 
 BallMenu.prototype.drawBalls = function () {
-    this.balls.forEach(function (item,i) {
+    this.balls.forEach(function (item) {
         item.fn_draw();
     })
 };
@@ -264,35 +251,10 @@ BallMenu.prototype.getSelected = function () {
 };
 
 BallMenu.prototype.clearAll = function(){
-    /*cancellazione approssimata
-    let l = (ballset.findLevel(ballset.length)+1.5)*(2*ballset.radius)
-    ctx.clearRect(-l,-l,2*l,2*l)
 
-    /*cancellazione esatta*/
-    //let l = this.getBound();
-    //this.context.clearRect(l.x*this.radius-2,l.y*this.radius-2,l.width*this.radius+4,l.height*this.radius+4);
+    this.context.clearRect(-this.positions.canvas_size.w/2,-this.positions.canvas_size.h/2,
+        this.positions.canvas_size.w,this.positions.canvas_size.h);
 
-    /*cancellazione approssimata*/
-    let l = (this.findLevel(this.balls.length)+1.5)*(2*this.radius);
-    this.context.clearRect(-1000,-1000,2*1000,2*1000);
-
-    /*this.context.beginPath();
-    this.context.lineWidth="1";
-    this.context.strokeStyle="red";
-    this.context.rect(-l,-l,2*l,2*l);
-    this.context.stroke();*/
-
-};
-
-BallMenu.prototype.getBound = function(){
-    return this.bound;
-};
-
-BallMenu.prototype.setBound = function(){
-    this.bound.y = -(this.findLevel(this.balls.length)*2 +1);
-    this.bound.x = -(this.findLevel(this.balls.length)*2*0.86602540378 + 1);
-    this.bound.width = -2*this.bound.x;
-    this.bound.height = -2*this.bound.y
 };
 
 BallMenu.prototype.setMouseWheelHandler = function(){
@@ -306,18 +268,34 @@ BallMenu.prototype.setMouseWheelHandler = function(){
         }
         if(e.deltaY < 0){
             self.radius *= factor;
-            self.setZoomDirection(1);
         } else {
             self.radius /= factor;
-            self.setZoomDirection(-1);
+        }
+        //se il raggio ha già le dimensioni limite non faccio nulla
+        if(self.radius >= self.maxRadius || self.radius <= self.minRadius){
+            return;
         }
 
-        let mul = (self.radius - old_r)/ old_r;
+        self.setRadius(self.radius);
+
         let x = e.clientX - self.positions.center.x - self.positions.to_reach.x;
         let y = e.clientY - self.positions.center.y - self.positions.to_reach.y;
-        self.positions.to_reach.x -= (x*mul);
-        self.positions.to_reach.y -= (y*mul);
-        self.setRadius(self.radius);
+
+        let mul = 2*(self.radius - old_r);
+        let ht = null;
+
+        let selected = self.getSelected();
+        if(selected){
+            ht = selected.position;
+        } else {
+            ht = {
+                x: x/2/old_r,
+                y: y/2/old_r
+            }
+        }
+        self.positions.to_reach.x -= (ht.x * mul);
+        self.positions.to_reach.y -= (ht.y * mul);
+
         self.setAllDrawable();
         jsAnimator.animationStart();
     })
@@ -337,7 +315,7 @@ BallMenu.prototype.setMouseDownHandler = function () {
 
 BallMenu.prototype.setMouseUpHandler = function(){
     let self = this;
-    this.canvas.addEventListener('mouseup',function(e){
+    this.canvas.addEventListener('mouseup',function(){
         let release = new Date();
         if(release - self.downTimer < 100){
             self.dragging = false;
@@ -415,13 +393,13 @@ BallMenu.prototype.incrementAccumulator = function () {
 
 BallMenu.prototype.passCoordinates = function () {
     let self = this;
-    this.balls.forEach(function (item,i) {
+    this.balls.forEach(function (item) {
         item.passCoordinates(self.positions);
     })
 };
 
 BallMenu.prototype.setAllDrawable = function () {
-    this.balls.forEach(function (item,i) {
+    this.balls.forEach(function (item) {
         item.setDrawable();
     })
 };
