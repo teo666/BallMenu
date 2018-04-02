@@ -26,6 +26,7 @@ function BallMenu(){
         }
     };
     this.radius = 75;
+    this.default_ball_size = 75;
     this.sqrt3d2 = 0.86602540378;
     this.selected = -1;
     this.minRadius = null;
@@ -112,6 +113,7 @@ BallMenu.prototype.init = function (menu_conf) {
         menu_conf.ball_size = 75;
     }
     this.setRadius(menu_conf.ball_size);
+    this.default_ball_size = menu_conf.ball_size
     this.setRealRadius(menu_conf.ball_size);
 
     if(menu_conf.hasOwnProperty('ball_max_size')){
@@ -426,8 +428,9 @@ BallMenu.prototype.setKeyboardUpHandler = function () {
             case 83://s
                 self.positions.to_reach.y -= 150;
                 break;
-            case 32://space
+            case 32://space reset all transformations
                 self.positions.to_reach.x = self.positions.to_reach.y = 0;
+                self.setRadius(self.default_ball_size);
                 break;
             default:
                 //console.log(e.keyCode);
