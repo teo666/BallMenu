@@ -123,4 +123,4 @@ let conf = [
         "srcImg":"./Img/fs_crop.png",
         "dstUrl":"http://www.trenitalia.com/"
     }
-]
+];

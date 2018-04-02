@@ -104,6 +104,7 @@ BallMenu.prototype.init = function (menu_conf) {
     this.setMouseWheelHandler();
     this.setMouseDownHandler();
     this.setMouseUpHandler();
+    this.setKeyboardUpHandler();
     this.center();
     this.loadConf(conf);
     this.loadForAnimation();
@@ -403,6 +404,40 @@ BallMenu.prototype.setMouseMoveHandler = function(){
             jsAnimator.animationStart();
         }
     });
+};
+
+BallMenu.prototype.setKeyboardUpHandler = function () {
+    let self = this;
+    window.addEventListener("keyup", function (e) {
+        switch (e.keyCode){
+            case 37://left
+            case 65://a
+                self.positions.to_reach.x += 150;
+                break;
+            case 38://up
+            case 87://w
+                self.positions.to_reach.y += 150;
+                break;
+            case 39://right
+            case 68://d
+                self.positions.to_reach.x -= 150;
+                break;
+            case 40://down
+            case 83://s
+                self.positions.to_reach.y -= 150;
+                break;
+            case 32://space
+                self.positions.to_reach.x = self.positions.to_reach.y = 0;
+                break;
+            default:
+                //console.log(e.keyCode);
+                return;
+        }
+        self.positions.stop = false;
+        self.setAllDrawable();
+        jsAnimator.animationStart();
+    });
+
 };
 
 BallMenu.prototype.incrementAccumulator = function () {
