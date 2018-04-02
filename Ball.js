@@ -138,7 +138,7 @@ Ball.prototype.hitTest = function(e){
     let y = this.position.y *2* this.radius;
 
     //console.log(this.position, e);
-    return (Math.pow(e.x-x,2) + Math.pow(e.y-y,2) < Math.pow(this.radius * (1 - this.padding),2));
+    return (Math.pow(e.x-x,2) + Math.pow(e.y-y,2) < Math.pow(this.real_radius* (1.0 - this.padding + this.offset),2));
 };
 
 Ball.prototype.setDrawable = function(){

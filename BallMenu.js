@@ -46,13 +46,13 @@ BallMenu.prototype.setMinRadius = function (n) {
 BallMenu.prototype.setRadius = function (n) {
     if(n < 0 ) return false;
     if(this.minRadius == null){
-        this.setMinRadius(n);
+        //this.setMinRadius(n);
     } else if(n < this.minRadius){
         n = this.minRadius;
     }
 
     if(this.maxRadius == null){
-        this.setMaxRadius(n);
+        //this.setMaxRadius(n);
     } else if(n > this.maxRadius){
         n = this.maxRadius;
     }
@@ -289,12 +289,12 @@ BallMenu.prototype.setBound = function(){
     this.bound.height = -2*this.bound.y
 };
 
-BallMenu.prototype.setMouseWheelHanler = function(){
+BallMenu.prototype.setMouseWheelHandler = function(){
     let self = this;
     this.canvas.addEventListener('wheel', function(e){
         e.preventDefault();
-        //console.log(e.deltaY);
         let factor = 1.05;
+        let old_r = self.radius;
         if(e.ctrlKey){
             factor *= 1.08;
         }
@@ -306,17 +306,18 @@ BallMenu.prototype.setMouseWheelHanler = function(){
             self.setZoomDirection(-1);
         }
 
-        self.positions.zoom_handle.x = e.clientX;
-        self.positions.zoom_handle.y = e.clientY;
+        let mul = (self.radius - old_r)/ old_r;
+        let x = e.clientX - self.positions.center.x - self.positions.to_reach.x;
+        let y = e.clientY - self.positions.center.y - self.positions.to_reach.y;
+        self.positions.to_reach.x -= (x*mul);
+        self.positions.to_reach.y -= (y*mul);
         self.setRadius(self.radius);
         self.setAllDrawable();
-        //self.clearAll();
-        //self.drawBalls();
         jsAnimator.animationStart();
     })
 };
 
-BallMenu.prototype.setMouseDownHanler = function () {
+BallMenu.prototype.setMouseDownHandler = function () {
     let self = this;
     this.canvas.addEventListener('mousedown',function(e){
         //console.log(e.clientX - self.positions.center.x, e.clientY - self.positions.center.y);
@@ -346,9 +347,9 @@ BallMenu.prototype.setMouseMoveHandler = function(){
     let sel = -1;
     this.canvas.addEventListener('mousemove',function(e){
         sel = -1;
-        self.positions.zoom_handle.x = e.clientX - self.positions.center.x - self.positions.accumulated.x;
-        self.positions.zoom_handle.y = e.clientY - self.positions.center.y - self.positions.accumulated.y;
-        //console.log(self.positions.zoom_handle, self.positions.accumulated)
+        self.positions.zoom_handle.x = (e.clientX - self.positions.center.x - self.positions.to_reach.x);
+        self.positions.zoom_handle.y = (e.clientY - self.positions.center.y - self.positions.to_reach.y);
+        //console.log(self.positions.zoom_handle)
         if(self.probably_dragging){
             self.dragging = true;
             self.positions.to_reach.x += (e.clientX - self.positions.handle.x);
