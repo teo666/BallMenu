@@ -3,9 +3,8 @@ function Ball (srcI, dstU, positions,prop) {
     this.dst = dstU;
     this.img = new Image();
     this.loaded = false;
-    //la posizione della palla all'interno del canvas
+    //la posizione della palla all'interno del canvas se moltiplicata per il diametro
     this.position = {x: 0, y: 0};
-    this.r = 0;
     this.offset = 0.85;
     this.min = 0;
     this.offIncrement = 0.02;
@@ -16,11 +15,28 @@ function Ball (srcI, dstU, positions,prop) {
     this.padding = 0;
     this.selected = false;
     this.prop = prop;
-    this.zoom_direction = 0;
     this.parent_pos = positions;
 }
 Ball.prototype.fn_draw = function () {
-    let r = this.real_radius * (1.0 - this.padding + this.offset);
+    let min;
+    let cToS = {
+        x: this.position.x*2*this.radius + this.parent_pos.accumulated.x + this.parent_pos.center.x,
+        y: this.position.y*2*this.radius + this.parent_pos.accumulated.y + this.parent_pos.center.y
+    };
+    //console.log(cToS)
+    if(cToS.x < this.radius || cToS.x > this.parent_pos.canvas_size.w - this.radius ||
+        cToS.y < this.radius || cToS.y > this.parent_pos.canvas_size.h - this.radius){
+        min = Math.min(cToS.x ,this.parent_pos.canvas_size.w - cToS.x, cToS.y,
+            this.parent_pos.canvas_size.h - cToS.y) - this.radius;
+        min = Math.abs(min);
+
+    } else {
+        min = 0;
+    }
+    /*if(this.position.x == 0 && this.position.y == 0){
+        console.log(min);
+    }*/
+    let r = Math.max(0, this.real_radius * (1.0 - this.padding + this.offset) - min);
     //console.log("--" +r, this.real_radius, this.radius);
 
     if(this.isLoaded()){
@@ -34,10 +50,6 @@ Ball.prototype.fn_draw = function () {
 
 Ball.prototype.setSelected = function (b) {
     this.selected = b;
-};
-
-Ball.prototype.passCoordinates = function (n) {
-    this.menuPositions = n;
 };
 
 Ball.prototype.fn_stop = function () {

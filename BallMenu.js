@@ -19,11 +19,11 @@ function BallMenu(){
             x: 0,
             y: 0
         },
-        zoom_handle:{
-            x: 0,
-            y: 0
-        },
         stop: false,
+        canvas_size : {
+            w: 0,
+            h: 0
+        }
     };
     this.radius = 75;
     this.sqrt3d2 = 0.86602540378;
@@ -41,6 +41,11 @@ BallMenu.prototype.setMaxRadius = function (n) {
 
 BallMenu.prototype.setMinRadius = function (n) {
     this.minRadius = n;
+};
+
+BallMenu.prototype.setCanvasSize = function () {
+    this.positions.canvas_size.w = this.canvas.width;
+    this.positions.canvas_size.h = this.canvas.height;
 };
 
 BallMenu.prototype.setRadius = function (n) {
@@ -88,6 +93,7 @@ BallMenu.prototype.resize = function () {
     if (!this.canvas) return;
     this.canvas.height = window.innerHeight;
     this.canvas.width = window.innerWidth;
+    this.setCanvasSize();
 };
 
 BallMenu.prototype.init = function () {
@@ -320,6 +326,7 @@ BallMenu.prototype.setMouseWheelHandler = function(){
 BallMenu.prototype.setMouseDownHandler = function () {
     let self = this;
     this.canvas.addEventListener('mousedown',function(e){
+        self.downTimer = new Date();
         //console.log(e.clientX - self.positions.center.x, e.clientY - self.positions.center.y);
         self.positions.handle.x = e.clientX;
         self.positions.handle.y = e.clientY;
@@ -331,6 +338,12 @@ BallMenu.prototype.setMouseDownHandler = function () {
 BallMenu.prototype.setMouseUpHandler = function(){
     let self = this;
     this.canvas.addEventListener('mouseup',function(e){
+        let release = new Date();
+        if(release - self.downTimer < 100){
+            self.dragging = false;
+            self.positions.accumulated.x = self.positions.to_reach.x;
+            self.positions.accumulated.y = self.positions.to_reach.y;
+        }
         if(!self.dragging && self.selected > -1){
             //document.location.href = ballset.getBalls()[ballset.selected].getDstUrl()
             window.open(self.balls[self.selected].getDstUrl(),'_blank');
@@ -347,9 +360,6 @@ BallMenu.prototype.setMouseMoveHandler = function(){
     let sel = -1;
     this.canvas.addEventListener('mousemove',function(e){
         sel = -1;
-        self.positions.zoom_handle.x = (e.clientX - self.positions.center.x - self.positions.to_reach.x);
-        self.positions.zoom_handle.y = (e.clientY - self.positions.center.y - self.positions.to_reach.y);
-        //console.log(self.positions.zoom_handle)
         if(self.probably_dragging){
             self.dragging = true;
             self.positions.to_reach.x += (e.clientX - self.positions.handle.x);
