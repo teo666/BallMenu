@@ -82,11 +82,16 @@ BallMenu.prototype.resize = function () {
     this.setCanvasSize();
 };
 
-BallMenu.prototype.init = function () {
-    this.canvas = document.getElementById("ballCanvas");
+BallMenu.prototype.init = function (menu_conf) {
+    if(!menu_conf || !menu_conf.canvas_id ){
+        throw "Parameter canvas_id is not specified";
+    }
+    this.canvas = document.getElementById(menu_conf.canvas_id);
     if(this.canvas && this.canvas.tagName.toLowerCase() === "canvas"){
         this.resize();
         this.context = this.canvas.getContext("2d");
+    } else {
+        throw "Parameter canvas_id is not a valid id";
     }
     let self = this;
     window.onresize = function () {
@@ -95,6 +100,32 @@ BallMenu.prototype.init = function () {
         //self.drawOrigin();
         self.drawBalls();
     };
+    this.setMouseMoveHandler();
+    this.setMouseWheelHandler();
+    this.setMouseDownHandler();
+    this.setMouseUpHandler();
+    this.center();
+    this.loadConf(conf);
+    this.loadForAnimation();
+    if(!menu_conf.hasOwnProperty('ball_size')){
+        menu_conf.ball_size = 75;
+    }
+    this.setRadius(menu_conf.ball_size);
+    this.setRealRadius(menu_conf.ball_size);
+
+    if(menu_conf.hasOwnProperty('ball_max_size')){
+        this.setMaxRadius(menu_conf.ball_max_size);
+        this.setRealRadius(500);
+    }
+    if(menu_conf.hasOwnProperty('ball_min_size')){
+        this.setMinRadius(menu_conf.ball_min_size);
+    }
+    if(!menu_conf.hasOwnProperty('ball_padding')){
+        menu_conf.ball_padding = 0.15;
+    }
+    this.setPadding(menu_conf.ball_padding);
+    this.dispose();
+    this.setContext();
 };
 
 BallMenu.prototype.drawOrigin = function(){

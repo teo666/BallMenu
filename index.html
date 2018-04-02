@@ -16,28 +16,18 @@
     let menu = null;
     function init() {
         menu = new BallMenu();
-        menu.init("ballCanvas");
-        menu.setMouseMoveHandler();
-        menu.setMouseWheelHandler();
-        menu.setMouseDownHandler();
-        menu.setMouseUpHandler();
-        menu.center();
-        //menu.drawOrigin();
-        menu.loadConf(conf);
-        menu.loadForAnimation();
-        menu.setRadius(75);
-        menu.setMaxRadius(500);
-        menu.setMinRadius(10);
-        menu.setRealRadius(500);
-        menu.setPadding(0.15);
-        menu.dispose();
-        menu.setContext();
+        let menu_conf = {
+            canvas_id: 'ballCanvas',
+            ball_size: 75,
+            ball_max_size: 500,
+            ball_min_size: 10,
+            ball_padding: 0.15,
+        };
+        menu.init(menu_conf);
+
         jsAnimator.setGlobalOnFrameRenderStart(function () {
             menu.clearAll();
             menu.incrementAccumulator();
-        });
-        jsAnimator.setGlobalOnFrameRenderEnd(function () {
-
         });
         menu.loadBall().then(function () {
             menu.drawBalls();
