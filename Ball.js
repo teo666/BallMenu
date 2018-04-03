@@ -15,6 +15,7 @@ function Ball (srcI, dstU, positions,prop) {
     this.prop = prop;
     this.parent_pos = positions;
     this.min = 0;
+    this.offset_correction = 1;
 }
 Ball.prototype.fn_draw = function () {
 
@@ -28,12 +29,13 @@ Ball.prototype.fn_draw = function () {
         this.min = Math.min(cToS.x ,this.parent_pos.canvas_size.w - cToS.x, cToS.y,
             this.parent_pos.canvas_size.h - cToS.y) - this.real_radius;
         this.min = Math.abs(this.min);
-
     } else {
         this.min = 0;
     }
+    this.offset_correction = (this.radius - this.min)/ this.radius;
+    //console.log(this.offset_correction);
 
-    let r = Math.max(0, this.real_radius * (1.0 - this.padding + this.offset ) - this.min * 0.85);
+    let r = Math.max(0, this.real_radius * (1.0 - this.padding + this.offset * this.offset_correction ) - this.min * 0.85);
 
     if(this.isLoaded()){
         this.context.save();
@@ -138,7 +140,8 @@ Ball.prototype.hitTest = function(e){
     let y = this.position.y *2* this.radius;
 
     //console.log(this.position, e);
-    return (Math.pow(e.x-x,2) + Math.pow(e.y-y,2) < Math.pow(this.real_radius * (1.0 - this.padding + this.offset )- this.min *0.85,2));
+    return (Math.pow(e.x-x,2) + Math.pow(e.y-y,2) <
+        Math.pow(this.real_radius * (1.0 - this.padding + this.offset * this.offset_correction  )- this.min *0.85,2));
 };
 
 Ball.prototype.setDrawable = function(){
