@@ -94,6 +94,7 @@ BallMenu.prototype.init = function (menu_conf) {
     } else {
         throw "Parameter canvas_id is not a valid id";
     }
+
     let self = this;
     window.onresize = function () {
         self.resize();
@@ -113,7 +114,7 @@ BallMenu.prototype.init = function (menu_conf) {
         menu_conf.ball_size = 75;
     }
     this.setRadius(menu_conf.ball_size);
-    this.default_ball_size = menu_conf.ball_size
+    this.default_ball_size = menu_conf.ball_size;
     this.setRealRadius(menu_conf.ball_size);
 
     if(menu_conf.hasOwnProperty('ball_max_size')){
@@ -354,7 +355,7 @@ BallMenu.prototype.setMouseUpHandler = function(){
     this.canvas.addEventListener('mouseup',function(){
         let release = new Date();
         if(release - self.downTimer < 100){
-            self.dragging = false;
+            self.probably_dragging = false;
             self.positions.accumulated.x = self.positions.to_reach.x;
             self.positions.accumulated.y = self.positions.to_reach.y;
         }
@@ -363,7 +364,7 @@ BallMenu.prototype.setMouseUpHandler = function(){
             window.open(self.balls[self.selected].getDstUrl(),'_blank');
             window.focus();
         }
-        self.dragging = false;
+        //self.dragging = false;
         self.probably_dragging = false;
         //console.log(move.drag)
     })
@@ -378,7 +379,7 @@ BallMenu.prototype.setMouseMoveHandler = function(){
             self.dragging = true;
             self.positions.to_reach.x += (e.clientX - self.positions.handle.x);
             self.positions.to_reach.y += (e.clientY - self.positions.handle.y);
-            //self.setAllDrawable();
+            self.setAllDrawable();
             self.positions.stop = false;
             jsAnimator.animationStart();
             self.positions.handle.x = e.clientX;
@@ -428,12 +429,20 @@ BallMenu.prototype.setKeyboardUpHandler = function () {
             case 83://s
                 self.positions.to_reach.y -= 150;
                 break;
+            case 90://z
+                self.radius /= 1.5;
+                self.setRadius(self.radius);
+                break;
+            case 88://x
+                self.radius *= 1.5;
+                self.setRadius(self.radius);
+                break;
             case 32://space reset all transformations
                 self.positions.to_reach.x = self.positions.to_reach.y = 0;
                 self.setRadius(self.default_ball_size);
                 break;
             default:
-                //console.log(e.keyCode);
+                console.log(e.keyCode);
                 return;
         }
         self.positions.stop = false;

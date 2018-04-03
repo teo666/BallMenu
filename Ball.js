@@ -5,9 +5,8 @@ function Ball (srcI, dstU, positions,prop) {
     this.loaded = false;
     //la posizione della palla all'interno del canvas se moltiplicata per il diametro
     this.position = {x: 0, y: 0};
-    this.offset = 0.85;
     this.min = 0;
-    this.offset  = 0;
+    this.offset = 0;
     this.context = null;
     this.radius = 0;
     this.real_radius = 0;
@@ -34,7 +33,7 @@ Ball.prototype.fn_draw = function () {
         this.min = 0;
     }
 
-    let r = Math.max(0, this.real_radius * (1.0 - this.padding + this.offset) - this.min);
+    let r = Math.max(0, this.real_radius * (1.0 - this.padding + this.offset ) - this.min * 0.85);
 
     if(this.isLoaded()){
         this.context.save();
@@ -61,7 +60,7 @@ Ball.prototype.fn_update = function () {
         this.offset += 0.02;
         this.offset = Math.min(this.padding, this.offset);
     } else {
-        this.offset -= 0.02;
+        this.offset -= 0.02 ;
         this.offset = Math.max(0,this.offset);
     }
 
@@ -139,7 +138,7 @@ Ball.prototype.hitTest = function(e){
     let y = this.position.y *2* this.radius;
 
     //console.log(this.position, e);
-    return (Math.pow(e.x-x,2) + Math.pow(e.y-y,2) < Math.pow(this.real_radius * (1.0 - this.padding + this.offset )- this.min,2));
+    return (Math.pow(e.x-x,2) + Math.pow(e.y-y,2) < Math.pow(this.real_radius * (1.0 - this.padding + this.offset )- this.min *0.85,2));
 };
 
 Ball.prototype.setDrawable = function(){
