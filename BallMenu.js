@@ -360,7 +360,6 @@ BallMenu.prototype.setMouseUpHandler = function(){
             self.positions.accumulated.x = self.positions.to_reach.x;
             self.positions.accumulated.y = self.positions.to_reach.y;
         }
-        console.log(self.dragging)
         if(!self.dragging && self.selected > -1){
             //document.location.href = ballset.getBalls()[ballset.selected].getDstUrl()
             window.open(self.balls[self.selected].getDstUrl(),'_blank');
