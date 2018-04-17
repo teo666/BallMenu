@@ -8,29 +8,19 @@
     <script type="text/javascript" src="./conf.js"></script>
     <script type="text/javascript" src="./Ball.js"></script>
     <script type="text/javascript" src="./BallMenu.js"></script>
+    <script type="text/javascript" src="./lib/wordfilter/wordsFilter.js"></script>
 </head>
 <body onload="init()">
-<div class="w3-sidebar w3-bar-block w3-card w3-animate-left" style="display:none" id="mySidebar">
-    <button class="w3-bar-item w3-button w3-large" onclick="w3_close()">Close &times;</button>
-    <a href="#" class="w3-bar-item w3-button">Link 1</a>
-    <a href="#" class="w3-bar-item w3-button">Link 2</a>
-    <a href="#" class="w3-bar-item w3-button">Link 3</a>
-</div>
+
 <canvas id="ballCanvas" width="5000" height="5000"></canvas>
+<input id="search">
 <script>
-    function w3_open() {
-        //document.getElementById("main").style.marginLeft = "25%";
-        document.getElementById("mySidebar").style.width = "25%";
-        document.getElementById("mySidebar").style.display = "block";
-        //document.getElementById("openNav").style.display = 'none';
-    }
-    function w3_close() {
-        document.getElementById("main").style.marginLeft = "0%";
-        document.getElementById("mySidebar").style.display = "none";
-        document.getElementById("openNav").style.display = "inline-block";
-    }
+
     let menu = null;
+    let word_filter = null;
+    let input = null;
     function init() {
+        input = document.getElementById("search");
         menu = new BallMenu();
         let menu_conf = {
             canvas_id: 'ballCanvas',
@@ -41,6 +31,8 @@
         };
         menu.init(menu_conf);
 
+        word_filter = new WordsFilter(menu.getBalls());
+
         jsAnimator.setGlobalOnFrameRenderStart(function () {
             menu.clearAll();
             menu.incrementAccumulator();
@@ -50,6 +42,39 @@
             jsAnimator.animationStart();
         });
     }
+
+    //TODO creare una funziona per spostare gli elementi anziché accede alla posizione direttamente
+    window.addEventListener("keyup", function (e) {
+        switch (e.keyCode){
+            case 37://left
+                //case 65://a
+                menu.positions.to_reach.x += 150;
+                break;
+            case 38://up
+                //case 87://w
+                menu.positions.to_reach.y += 150;
+                break;
+            case 39://right
+                //case 68://d
+                menu.positions.to_reach.x -= 150;
+                break;
+            case 40://down
+                //case 83://s
+                menu.positions.to_reach.y -= 150;
+                break;
+            case 27:// esc all transformations
+                menu.positions.to_reach.x = self.positions.to_reach.y = 0;
+                menu.setRadius(menu.default_ball_size);
+                break;
+            default:
+                //console.log(e);
+                return;
+        }
+        menu.positions.stop = false;
+        menu.setAllDrawable();
+        jsAnimator.animationStart();
+    });
+
 </script>
 </body>
 </html>

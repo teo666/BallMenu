@@ -1,4 +1,4 @@
-function Ball (srcI, dstU, positions,prop) {
+function Ball (srcI, dstU, descr, positions,prop) {
     this.src = srcI;
     this.dst = dstU;
     this.img = new Image();
@@ -16,6 +16,8 @@ function Ball (srcI, dstU, positions,prop) {
     this.parent_pos = positions;
     this.min = 0;
     this.offset_correction = 1;
+    this.search_weight = 1;
+    this.description = descr;
 }
 Ball.prototype.fn_draw = function () {
 

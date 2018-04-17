@@ -33,6 +33,7 @@ function BallMenu(){
     this.minRadius = null;
     this.dragging = false;
     this.probably_dragging = false;
+    this.drag_delay = null;
 }
 
 BallMenu.prototype.setMaxRadius = function (n) {
@@ -106,7 +107,6 @@ BallMenu.prototype.init = function (menu_conf) {
     this.setMouseWheelHandler();
     this.setMouseDownHandler();
     this.setMouseUpHandler();
-    this.setKeyboardUpHandler();
     this.center();
     this.loadConf(conf);
     this.loadForAnimation();
@@ -163,7 +163,10 @@ BallMenu.prototype.loadConf = function (config) {
             if(!item.hasOwnProperty("srcImg") || ! item.hasOwnProperty("dstUrl")){
                 console.warn("Element at position " + i + " in bad formatted");
             }else {
-                self.balls.push(new Ball(item.srcImg,item.dstUrl,self.positions,{keepOnEnd: true,keepDraw: true}));
+                if(!item.hasOwnProperty("descr")){
+                    item["descr"] = item.dstUrl;
+                }
+                self.balls.push(new Ball(item.srcImg,item.dstUrl, item.descr, self.positions,{keepOnEnd: true,keepDraw: true}));
             }
         })
     }catch(e){
@@ -267,6 +270,10 @@ BallMenu.prototype.getBall = function (n) {
     return this.balls[n];
 };
 
+BallMenu.prototype.getBalls = function () {
+    return this.balls;
+};
+
 BallMenu.prototype.drawBalls = function () {
     this.balls.forEach(function (item) {
         item.fn_draw();
@@ -341,38 +348,34 @@ BallMenu.prototype.setMouseWheelHandler = function(){
 BallMenu.prototype.setMouseDownHandler = function () {
     let self = this;
     this.canvas.addEventListener('mousedown',function(e){
-        self.downTimer = new Date();
-        //console.log(e.clientX - self.positions.center.x, e.clientY - self.positions.center.y);
         self.positions.handle.x = e.clientX;
         self.positions.handle.y = e.clientY;
 
-        self.probably_dragging = true;
+        self.drag_delay = setTimeout(function () {
+            self.probably_dragging = true;
+        },100);
+
         self.dragging = false;
     })
 };
 
 BallMenu.prototype.setMouseUpHandler = function(){
     let self = this;
+    let inp = document.getElementById("search");
     this.canvas.addEventListener('mouseup',function(){
-        let release = new Date();
-        if(release - self.downTimer < 100){
-            self.probably_dragging = false;
-            self.positions.accumulated.x = self.positions.to_reach.x;
-            self.positions.accumulated.y = self.positions.to_reach.y;
-        }
+        clearTimeout(self.drag_delay);
+        self.probably_dragging = false;
         if(!self.dragging && self.selected > -1){
-            //document.location.href = ballset.getBalls()[ballset.selected].getDstUrl()
             window.open(self.balls[self.selected].getDstUrl(),'_blank');
             window.focus();
         }
-        //self.dragging = false;
-        self.probably_dragging = false;
-        //console.log(move.drag)
+        self.dragging = false;
+        inp.focus();
     })
 };
 
 BallMenu.prototype.setMouseMoveHandler = function(){
-    self = this;
+    let self = this;
     let sel = -1;
     this.canvas.addEventListener('mousemove',function(e){
         sel = -1;
@@ -408,49 +411,6 @@ BallMenu.prototype.setMouseMoveHandler = function(){
             jsAnimator.animationStart();
         }
     });
-};
-
-BallMenu.prototype.setKeyboardUpHandler = function () {
-    let self = this;
-    window.addEventListener("keyup", function (e) {
-        switch (e.keyCode){
-            case 37://left
-            case 65://a
-                self.positions.to_reach.x += 150;
-                break;
-            case 38://up
-            case 87://w
-                self.positions.to_reach.y += 150;
-                break;
-            case 39://right
-            case 68://d
-                self.positions.to_reach.x -= 150;
-                break;
-            case 40://down
-            case 83://s
-                self.positions.to_reach.y -= 150;
-                break;
-            case 90://z
-                self.radius /= 1.5;
-                self.setRadius(self.radius);
-                break;
-            case 88://x
-                self.radius *= 1.5;
-                self.setRadius(self.radius);
-                break;
-            case 32://space reset all transformations
-                self.positions.to_reach.x = self.positions.to_reach.y = 0;
-                self.setRadius(self.default_ball_size);
-                break;
-            default:
-                console.log(e.keyCode);
-                return;
-        }
-        self.positions.stop = false;
-        self.setAllDrawable();
-        jsAnimator.animationStart();
-    });
-
 };
 
 BallMenu.prototype.incrementAccumulator = function () {
