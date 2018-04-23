@@ -13,12 +13,13 @@
 <body onload="init()">
 
 <canvas id="ballCanvas" width="5000" height="5000"></canvas>
-<input id="search">
+<input id="search" class="hide" onkeyup="search_change(this.value)">
 <script>
 
     let menu = null;
     let word_filter = null;
     let input = null;
+    let search_timeout = null;
     function init() {
         input = document.getElementById("search");
         menu = new BallMenu();
@@ -41,6 +42,24 @@
             menu.drawBalls();
             jsAnimator.animationStart();
         });
+        input.focus();
+    }
+
+    function search_change(val){
+        //console.log(val);
+        clearTimeout(search_timeout);
+
+        if(val !== ""){
+            input.classList.remove('hide');
+        } else {
+            input.classList.add('hide');
+        }
+        search_timeout = setTimeout(function () {
+            word_filter.search(val);
+            menu.setAllDrawable();
+            jsAnimator.animationStart();
+        },500);
+
     }
 
     //TODO creare una funziona per spostare gli elementi anziché accede alla posizione direttamente
@@ -73,6 +92,8 @@
         menu.positions.stop = false;
         menu.setAllDrawable();
         jsAnimator.animationStart();
+
+        //console.log(input.value)
     });
 
 </script>

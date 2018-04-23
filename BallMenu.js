@@ -162,11 +162,11 @@ BallMenu.prototype.loadConf = function (config) {
         c.forEach(function(item, i){
             if(!item.hasOwnProperty("srcImg") || ! item.hasOwnProperty("dstUrl")){
                 console.warn("Element at position " + i + " in bad formatted");
-            }else {
-                if(!item.hasOwnProperty("descr")){
-                    item["descr"] = item.dstUrl;
+            } else {
+                if(!item.hasOwnProperty("desc")){
+                    item["desc"] = item.dstUrl;
                 }
-                self.balls.push(new Ball(item.srcImg,item.dstUrl, item.descr, self.positions,{keepOnEnd: true,keepDraw: true}));
+                self.balls.push(new Ball(item.srcImg,item.dstUrl, item.desc, self.positions,{keepOnEnd: true,keepDraw: true}));
             }
         })
     }catch(e){
