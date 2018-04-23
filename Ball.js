@@ -37,8 +37,9 @@ Ball.prototype.fn_draw = function () {
     this.offset_correction = (this.radius - this.min)/ this.radius;
     //console.log(this.offset_correction);
 
-    let r = Math.max(0, (this.real_radius * (1.0 - this.padding + this.offset * this.offset_correction ) - this.min * 0.85 )* this.search_weight);
-
+    let r = Math.max(0, this.real_radius * (1.0 - this.padding + this.offset * this.offset_correction ) - this.min * 0.85 );
+    //console.log(r, this.search_weight)
+    r *= this.search_weight;
     if(this.isLoaded()){
         this.context.save();
         this.context.translate(this.position.x*this.real_radius*2+this.parent_pos.accumulated.x,
