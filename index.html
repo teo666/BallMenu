@@ -13,13 +13,14 @@
 <body onload="init()">
 
 <canvas id="ballCanvas" width="5000" height="5000"></canvas>
-<input id="search" class="hide" onkeyup="search_change(this.value)">
+<input id="search" class="hide" onkeyup="search_change(this.value)" autocomplete="off">
 <script>
 
     let menu = null;
     let word_filter = null;
     let input = null;
     let search_timeout = null;
+    let input_has_value = false;
     function init() {
         input = document.getElementById("search");
         menu = new BallMenu();
@@ -31,6 +32,25 @@
             ball_padding: 0.15,
         };
         menu.init(menu_conf);
+        menu.resize();
+        menu.center();
+        //menu.drawOrigin();
+        menu.drawBalls();
+        document.getElementById('ballCanvas').addEventListener('mousemove', function(e) {
+            menu.move(e);
+        });
+        document.getElementById('ballCanvas').addEventListener('mousewheel', function(e) {
+            menu.wheel(e);
+        });
+        document.getElementById('ballCanvas').addEventListener('mousedown', function(e) {
+            menu.down(e);
+        });
+        document.getElementById('ballCanvas').addEventListener('mouseup', function(e) {
+            menu.up(e);
+            input.focus();
+        });
+
+
 
         word_filter = new WordsFilter(menu.getBalls());
 
@@ -47,46 +67,53 @@
 
     function search_change(val){
         //console.log(val);
+
         clearTimeout(search_timeout);
 
         if(val !== ""){
             input.classList.remove('hide');
+            input_has_value = true;
         } else {
             input.classList.add('hide');
+            input_has_value = false;
         }
         search_timeout = setTimeout(function () {
             word_filter.search(val);
             menu.setAllDrawable();
             jsAnimator.animationStart();
-        },100);
+        },200);
 
     }
 
-    //TODO creare una funziona per spostare gli elementi anziché accede alla posizione direttamente
     window.addEventListener("keyup", function (e) {
+        if(input_has_value && e.keyCode !== 27 && e.keyCode !== 13 ){
+            return;
+        }
         switch (e.keyCode){
             case 37://left
                 //case 65://a
-                menu.positions.to_reach.x += 150;
+                menu.moveLeft(150);
                 break;
             case 38://up
                 //case 87://w
-                menu.positions.to_reach.y += 150;
+                menu.moveUp(150);
                 break;
             case 39://right
                 //case 68://d
-                menu.positions.to_reach.x -= 150;
+                menu.moveRight(150);
                 break;
             case 40://down
                 //case 83://s
-                menu.positions.to_reach.y -= 150;
+                menu.moveDown(150);
                 break;
             case 27:// esc all transformations
-                menu.positions.to_reach.x = self.positions.to_reach.y = 0;
-                menu.setRadius(menu.default_ball_size);
+                menu.resetTransformation();
+                break;
+            case 13:
+                menu.tryOpen();
                 break;
             default:
-                //console.log(e);
+                console.log(e);
                 return;
         }
         menu.positions.stop = false;

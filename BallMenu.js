@@ -97,16 +97,16 @@ BallMenu.prototype.init = function (menu_conf) {
     }
 
     let self = this;
-    window.onresize = function () {
+    /*window.onresize = function () {
         self.resize();
         self.center();
         //self.drawOrigin();
         self.drawBalls();
-    };
-    this.setMouseMoveHandler();
-    this.setMouseWheelHandler();
-    this.setMouseDownHandler();
-    this.setMouseUpHandler();
+    };*/
+    //this.setMouseMoveHandler();
+    //this.setMouseWheelHandler();
+    //this.setMouseDownHandler();
+    //this.setMouseUpHandler();
     this.center();
     this.loadConf(conf);
     this.loadForAnimation();
@@ -179,6 +179,24 @@ BallMenu.prototype.setContext = function () {
     this.balls.forEach(function (item) {
         item.setContext(self.context);
     })
+};
+
+BallMenu.prototype.moveLeft = function(n){
+    this.positions.to_reach.x -= n
+};
+BallMenu.prototype.moveRight = function(n){
+    this.positions.to_reach.x += n
+};
+BallMenu.prototype.moveUp = function(n){
+    this.positions.to_reach.y -= n
+};
+BallMenu.prototype.moveDown = function(n){
+    this.positions.to_reach.y += n
+};
+
+BallMenu.prototype.resetTransformation = function(){
+    this.positions.to_reach.x = this.positions.to_reach.y = 0;
+    this.setRadius(menu.default_ball_size);
 };
 
 BallMenu.prototype.dispose = function(){
@@ -299,119 +317,133 @@ BallMenu.prototype.clearAll = function(){
 
 };
 
-BallMenu.prototype.setMouseWheelHandler = function(){
-    let self = this;
-    this.canvas.addEventListener('wheel', function(e){
-        e.preventDefault();
-        let factor = 1.05;
-        let old_r = self.radius;
-        if(e.ctrlKey){
-            factor *= 1.08;
+BallMenu.prototype.wheel = function(e){
+    e.preventDefault();
+    let factor = 1.05;
+    let old_r = this.radius;
+    if(e.ctrlKey){
+        factor *= 1.08;
+    }
+    if(e.deltaY < 0){
+        this.radius *= factor;
+    } else {
+        this.radius /= factor;
+    }
+    this.setRadius(this.radius);
+
+
+    //se il raggio ha già le dimensioni limite non faccio nulla
+    if(this.radius >= this.maxRadius || this.radius <= this.minRadius){
+        return;
+    }
+
+
+    let x = e.clientX - this.positions.center.x - this.positions.to_reach.x;
+    let y = e.clientY - this.positions.center.y - this.positions.to_reach.y;
+
+    let mul = 2*(this.radius - old_r);
+    let ht = null;
+
+    let selected = this.getSelected();
+    if(selected){
+        ht = selected.position;
+    } else {
+        ht = {
+            x: x/2/old_r,
+            y: y/2/old_r
         }
-        if(e.deltaY < 0){
-            self.radius *= factor;
-        } else {
-            self.radius /= factor;
-        }
-        self.setRadius(self.radius);
+    }
+    this.positions.to_reach.x -= (ht.x * mul);
+    this.positions.to_reach.y -= (ht.y * mul);
 
+    this.setAllDrawable();
+    jsAnimator.animationStart();
 
-        //se il raggio ha già le dimensioni limite non faccio nulla
-        if(self.radius >= self.maxRadius || self.radius <= self.minRadius){
-            return;
-        }
-
-
-        let x = e.clientX - self.positions.center.x - self.positions.to_reach.x;
-        let y = e.clientY - self.positions.center.y - self.positions.to_reach.y;
-
-        let mul = 2*(self.radius - old_r);
-        let ht = null;
-
-        let selected = self.getSelected();
-        if(selected){
-            ht = selected.position;
-        } else {
-            ht = {
-                x: x/2/old_r,
-                y: y/2/old_r
-            }
-        }
-        self.positions.to_reach.x -= (ht.x * mul);
-        self.positions.to_reach.y -= (ht.y * mul);
-
-        self.setAllDrawable();
-        jsAnimator.animationStart();
-    })
 };
 
-BallMenu.prototype.setMouseDownHandler = function () {
+BallMenu.prototype.down = function (e) {
     let self = this;
-    this.canvas.addEventListener('mousedown',function(e){
-        self.positions.handle.x = e.clientX;
-        self.positions.handle.y = e.clientY;
+    this.positions.handle.x = e.clientX;
+    this.positions.handle.y = e.clientY;
 
-        self.drag_delay = setTimeout(function () {
-            self.probably_dragging = true;
-        },100);
+    this.drag_delay = setTimeout(function () {
+        self.probably_dragging = true;
+    },100);
 
-        self.dragging = false;
-    })
+    this.dragging = false;
 };
 
-BallMenu.prototype.setMouseUpHandler = function(){
+BallMenu.prototype.up = function(){
     let self = this;
-    let inp = document.getElementById("search");
-    this.canvas.addEventListener('mouseup',function(){
-        clearTimeout(self.drag_delay);
-        self.probably_dragging = false;
-        if(!self.dragging && self.selected > -1){
-            window.open(self.balls[self.selected].getDstUrl(),'_blank');
-            window.focus();
-        }
-        self.dragging = false;
-        inp.focus();
-    })
+    //let inp = document.getElementById("search");
+
+    clearTimeout(self.drag_delay);
+    self.probably_dragging = false;
+    if(!self.dragging && self.selected > -1){
+        self.open();
+    }
+    self.dragging = false;
+    //inp.focus();
 };
 
-BallMenu.prototype.setMouseMoveHandler = function(){
+BallMenu.prototype.move = function(e){
     let self = this;
     let sel = -1;
-    this.canvas.addEventListener('mousemove',function(e){
-        sel = -1;
-        if(self.probably_dragging){
-            self.dragging = true;
-            self.positions.to_reach.x += (e.clientX - self.positions.handle.x);
-            self.positions.to_reach.y += (e.clientY - self.positions.handle.y);
-            self.setAllDrawable();
-            self.positions.stop = false;
-            jsAnimator.animationStart();
-            self.positions.handle.x = e.clientX;
-            self.positions.handle.y = e.clientY;
-            //console.log(self.positions.to_reach);
-        }
-        self.balls.forEach(function (item,i) {
-            if(item.hitTest({
-                    x: e.clientX - self.positions.center.x - self.positions.accumulated.x,
-                    y: e.clientY - self.positions.center.y - self.positions.accumulated.y
-            })){
-                sel = i;
-                return false;
-            }
-        });
-        let old_sel = self.getSelected();
-        self.selected = sel;
-        self.setSelected();
-        let sele = self.getSelected();
-        //console.log(e.clientX - self.positions.x, e.clientY - self.positions.y);
-        //console.log(self.selected);
-        if((old_sel || sele) && (old_sel !== sele)){
-            if(sele) sele.setDrawable();
-            if(old_sel) old_sel.setDrawable();
-            jsAnimator.animationStart();
+    if(this.probably_dragging){
+        this.dragging = true;
+        this.positions.to_reach.x += (e.clientX - this.positions.handle.x);
+        this.positions.to_reach.y += (e.clientY - this.positions.handle.y);
+        this.setAllDrawable();
+        this.positions.stop = false;
+        jsAnimator.animationStart();
+        this.positions.handle.x = e.clientX;
+        this.positions.handle.y = e.clientY;
+        //console.log(this.positions.to_reach);
+    }
+    this.balls.forEach(function (item,i) {
+        if(item.hitTest({
+                x: e.clientX - self.positions.center.x - self.positions.accumulated.x,
+                y: e.clientY - self.positions.center.y - self.positions.accumulated.y
+        })){
+            sel = i;
+            return false;
         }
     });
+    let old_sel = this.getSelected();
+    this.selected = sel;
+    this.setSelected();
+    let sele = this.getSelected();
+    //console.log(e.clientX - this.positions.x, e.clientY - this.positions.y);
+    //console.log(this.selected);
+    if((old_sel || sele) && (old_sel !== sele)){
+        if(sele) sele.setDrawable();
+        if(old_sel) old_sel.setDrawable();
+        jsAnimator.animationStart();
+    }
 };
+
+BallMenu.prototype.open = function(){
+    if(this.balls[this.selected].search_weight !== 0){
+        window.open(this.balls[this.selected].getDstUrl(),'_blank');
+        window.focus();
+    }
+};
+
+BallMenu.prototype.tryOpen = function(){
+    let found = 0;
+    let index = -1;
+    this.balls.forEach(function (item,i) {
+        if(item.search_weight){
+            found++;
+            index = i;
+        }
+    });
+    if(found === 1){
+        this.selected = index;
+        this.open();
+    }
+};
+
 
 BallMenu.prototype.incrementAccumulator = function () {
     let diff_x = this.positions.accumulated.x - this.positions.to_reach.x;
@@ -444,3 +476,4 @@ BallMenu.prototype.setAllDrawable = function () {
         item.setDrawable();
     })
 };
+
