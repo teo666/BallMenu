@@ -154,4 +154,10 @@ let conf = [
         "dstUrl":"http://www.trenitalia.com/",
         "desc" : "trenitalia"
     }
+    ,
+    {
+        "srcImg":"./Img/arduino_crop.png",
+        "dstUrl":"https://forum.arduino.cc/",
+        "desc" : "arduino forum"
+    }
 ];
