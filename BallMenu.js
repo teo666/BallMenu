@@ -52,10 +52,11 @@ BallMenu.prototype.setCanvasSize = function () {
 BallMenu.prototype.setRadius = function (n) {
     if(n < 0 ) return false;
     //limita la dimensione del raggio
-    if(n >= self.maxRadius || n <= self.minRadius){
-        n = Math.min(Math.max(self.minRadius,n),self.maxRadius);
+    if(n >= this.maxRadius || n <= this.minRadius){
+        n = Math.min(Math.max(this.minRadius,n),this.maxRadius);
     }
     this.radius = n;
+    //console.log(this.radius);
     this.balls.forEach(function (item) {
         item.setRadius(n);
     });
