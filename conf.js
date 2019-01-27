@@ -153,11 +153,17 @@ let conf = [
         "srcImg":"./Img/fs_crop.png",
         "dstUrl":"http://www.trenitalia.com/",
         "desc" : "trenitalia"
-    }
-    ,
+    },
     {
         "srcImg":"./Img/arduino_crop.png",
         "dstUrl":"https://forum.arduino.cc/",
         "desc" : "arduino forum"
-    }
+    },
+    {
+        "srcImg":"./Img/geeksforgeeks_crop.png",
+        "dstUrl":"https://www.geeksforgeeks.org/",
+        "desc" : "geeks for geeks"
+    },
+
+    
 ];
