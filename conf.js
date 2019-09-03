@@ -140,6 +140,11 @@ let conf = [
         "desc" : "github"
     },
     {
+        "srcImg":"./Img/gitlab_crop.png",
+        "dstUrl":"https://gitlab.com/",
+        "desc" : "gitlab"
+    },
+    {
         "srcImg":"./Img/allaboutcircuits_crop.png",
         "dstUrl":"https://www.allaboutcircuits.com/",
         "desc" : "all about circuit"
@@ -163,6 +168,11 @@ let conf = [
         "srcImg":"./Img/geeksforgeeks_crop.png",
         "dstUrl":"https://www.geeksforgeeks.org/",
         "desc" : "geeks for geeks"
+    },
+    {
+        "srcImg":"./Img/toggl_crop.png",
+        "dstUrl":"https://toggl.com/app/",
+        "desc" : "toggl"
     },
 
     
