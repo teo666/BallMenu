@@ -111,7 +111,7 @@ let conf = [
     },
     {
         "srcImg":"./Img/mps_crop.png",
-        "dstUrl":"https://ib.mps.it/web/ib/login",
+        "dstUrl":"https://digital.mps.it/pri/login/home_mobile.jsp",
         "desc" : "monte dei paschi di siena mps"
     },
     {
